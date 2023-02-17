@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver
+  labels:
+    name: nginx
+spec:
+ selector:
+   matchLabels:
+     name: nginx
+ replicas: 1
+ template: 
+   metadata: 
+     labels: 
+       name: nginx
+   spec:
+     containers:
+     - image: nginx
+       name: webserver
+       ports:
+         - containerPort: 80
+           name: www
+       volumeMounts:
+       - name: www-persistent-storage
+         mountPath: /usr/share/nginx/html
+     volumes:
+       - name: www-persistent-storage
+         persistentVolumeClaim:
+          claimName: nginx-claim
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec: 
+  type: NodePort
+  selector:
+    name: webserver
+  ports:
+  - nodePort: 31015
+    port: 8080
+    protocol: TCP
+    targetPort: 80
+
+
